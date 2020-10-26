@@ -1,0 +1,105 @@
+﻿#map {
+    width: 10px;
+    height: 100px;
+    min-height: 100%;
+    min-width: 100%;
+    display: block;
+}
+
+html, body {
+    height: 100%;
+}
+
+#map-holder {
+    height: 100%;
+}
+
+.fill {
+    min-height: 100%;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+}
+
+/*.container {
+    max-width: 100em;
+    padding: 0.2em;
+}
+*/
+
+.overlay:target {
+    visibility: visible;
+    opacity: 1;
+}
+
+.popup {
+    margin: 70px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 30%;
+    position: relative;
+    transition: all 5s ease-in-out;
+}
+
+    .popup h2 {
+        margin-top: 0;
+        color: #333;
+        font-family: Tahoma, Arial, sans-serif;
+    }
+
+    .popup .close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        transition: all 200ms;
+        font-size: 30px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #333;
+    }
+
+        .popup .close:hover {
+            color: #06D85F;
+        }
+
+    .popup .content {
+        max-height: 30%;
+        overflow: auto;
+    }
+
+.legend {
+    line-height: 18px;
+    color: #555;
+}
+
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.7;
+    }
+
+.legenddiv {
+    background-color: #EEF6F9;
+    border-radius: 5px;
+    width: 100px;
+    border: 1px solid green;
+    padding: 5px;
+    margin: 2px;
+}
+
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+    .info h4 {
+        margin: 0 0 5px;
+        color: #777;
+    }

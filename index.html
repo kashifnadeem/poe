@@ -1,0 +1,317 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Leaf Let Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <link rel="stylesheet" href="css/sitestyle.css" />
+
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
+
+    <script src="https://rawgithub.com/ismyrnow/Leaflet.groupedlayercontrol/master/src/leaflet.groupedlayercontrol.js"></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <script type="text/javascript" src="./data/countries5.js"></script>
+</head>
+<body>
+    <div id="map-holder">
+        <div class="container fill">
+            <div id="map"></div>
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        const map = L.map('map').setView([12, 25], 3);
+        //map.locate({ setView: true, maxZoom: 5 });
+
+        const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">Openstreetmap</a>';
+        const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+        //L.tileLayer.grayscale
+
+        const tiles = L.tileLayer(tileUrl, { attribution });
+        tiles.addTo(map);
+
+        function getColor(d) {
+
+            return d > 1000000 ? '#CE0A05' :
+                d > 500000 ? '#F04F09' :
+                    d > 100000 ? '#FF8B24' :
+                        d > 10000 ? '#F9C467' :
+                            d < 10000 ? '#F2DF91' :
+                                '#FFFFFF';
+        }
+
+        function style(feature) {
+            return {
+                fillColor: getColor(feature.properties.covid_cases),
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                fillOpacity: 0.5
+            };
+        }
+
+        L.geoJson(countriesData, { style: style }).addTo(map);
+
+        function highlightFeature(e) {
+            var layer = e.target;
+
+            layer.setStyle({
+                weight: 5,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.7
+            });
+
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
+            }
+
+            info.update(layer.feature.properties);
+        }
+
+        var geojson;
+
+        function resetHighlight(e) {
+            geojson.resetStyle(e.target);
+            info.update();
+        }
+
+        function zoomToFeature(e) {
+            map.fitBounds(e.target.getBounds());
+        }
+
+        function onEachFeature(feature, layer) {
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                //click: zoomToFeature
+            });
+        }
+
+        geojson = L.geoJson(countriesData, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+
+        var legend = L.control({ position: 'bottomleft' });
+
+        legend.onAdd = function (map) {
+
+            var div = L.DomUtil.create('div', 'legenddiv'),
+                grades = [0, 10000, 100000, 500000, 1000000],
+                labels = [];
+            div.innerHTML += '<div>COVID-19 Cases</div>'
+            // loop through our density intervals and generate a label with a colored square for each interval
+            for (var i = 0; i < grades.length; i++) {
+
+
+                div.innerHTML += '<i style="background:' + getColor(grades[i] + 1) + '">' +
+                    grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '</i><br>' : '+');
+            }
+            return div;
+        };
+
+        legend.addTo(map);
+
+        var info = L.control();
+
+        info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+            this.update();
+            return this._div;
+        };
+
+        // method that we will use to update the control based on feature properties passed
+        info.update = function (props) {
+            this._div.innerHTML = '<h4>COVID-19 Cases</h4>' + (props ?
+                '<b>' + props.name + '</b><br />' + props.covid_cases +'</sup>'
+                : 'Hover over a country');
+        };
+
+        info.addTo(map);
+
+        const airportIconUnknown = L.icon({
+            iconUrl: './images/airportunknown.png',
+            iconSize: [8, 8],
+            iconAnchor: [22, 15],
+        });
+        const airportIconOpen = L.icon({
+            iconUrl: './images/airportopen.png',
+            iconSize: [8, 8],
+            iconAnchor: [22, 15],
+        });
+        const airportIconClosed = L.icon({
+            iconUrl: './images/airportclosed.png',
+            iconSize: [8, 8],
+            iconAnchor: [22, 15],
+        });
+
+        const landIconUnknown = L.icon({
+            iconUrl: './images/landunknown.png',
+            iconSize: [4, 4],
+            iconAnchor: [22, 15],
+        });
+        const landIconOpen = L.icon({
+            iconUrl: './images/landopen.png',
+            iconSize: [4, 4],
+            iconAnchor: [22, 15],
+        });
+        const landIconClosed = L.icon({
+            iconUrl: './images/landclosed.png',
+            iconSize: [4, 4],
+            iconAnchor: [22, 15],
+        });
+
+        const seaIconUnknown = L.icon({
+            iconUrl: './images/seaunknown.png',
+            iconSize: [8, 8],
+            iconAnchor: [22, 15],
+        });
+        const seaIconOpen = L.icon({
+            iconUrl: './images/seaopen.png',
+            iconSize: [8, 8],
+            iconAnchor: [22, 15],
+        });
+        const seaIconClosed = L.icon({
+            iconUrl: './images/seaclosed.png',
+            iconSize: [8, 8],
+            iconAnchor: [22, 15],
+        });
+
+        var borderIcon = '';
+        async function getPoE() {
+            const response = await fetch('./data/poeall.json');
+            const data = await response.json();
+
+            var airportsMarkers = new L.LayerGroup();
+            var seaMarkers = new L.LayerGroup();
+            var landMarkers = new L.LayerGroup();
+
+            var marker = '';
+
+
+            for (item of data) {
+
+                let popup = `
+                                    <h2>Point of Entry</h2>
+                                    <div id="popupdiv" class="content">
+                                        <span>
+                                            <b>Country: </b> ${item.country}<br/>
+                                            <b>Location: </b> ${item['loc name']}<br/>
+                                            <b>Point Type: </b> ${item['loc type']}<br/>
+                                            <b>Status: </b> ${item['op_status']}
+                                        </span>
+                                    </div>
+
+
+                            `
+
+                //""
+
+                //let div = document.getElementById('popupdiv');
+                //let span = document.createElement('span');
+                //span.setAttribute('id', 'spancountry');
+                //console.log('<b>Country: </b>' + item.country);
+                //span.innerHTML = '<b>Country: </b>' + item.country;
+                //div.appendChild(span);
+
+                //console.log(document.getElementById('popupdiv').innerHTML)
+
+                //let popup = document.getElementById('popup');
+
+                if (item['loc type'] === 'airport') {
+                    if (item.status === 'unknown')
+                        borderIcon = airportIconUnknown
+                    if (item.status === 'open')
+                        borderIcon = airportIconOpen
+                    if (item.status === 'closed')
+                        borderIcon = airportIconClosed
+                    marker = L.marker([item.lat, item.lon], { icon: borderIcon }).addTo(airportsMarkers).bindPopup(popup).openPopup();
+                }
+
+                if (item['loc type'] === 'blue border') {
+                    if (item.status === 'unknown')
+                        borderIcon = seaIconUnknown
+                    if (item.status === 'open')
+                        borderIcon = seaIconOpen
+                    if (item.status === 'closed')
+                        borderIcon = seaIconClosed
+                    L.marker([item.lat, item.lon], { icon: borderIcon }).addTo(seaMarkers).bindPopup(popup).openPopup();
+                }
+
+                if (item['loc type'] === 'land border') {
+                    if (item.status === 'unknown')
+                        borderIcon = landIconUnknown
+                    if (item.status === 'open')
+                        borderIcon = landIconOpen
+                    if (item.status === 'closed')
+                        borderIcon = landIconClosed
+                    L.marker([item.lat, item.lon], { icon: borderIcon }).addTo(landMarkers).bindPopup(popup).openPopup();
+                }
+
+            }
+
+            airportsMarkers.addTo(map);
+
+            var groupedOverlays = {
+                "Point of Entry": {
+                    "Airports": airportsMarkers,
+                    "Sea Ports": seaMarkers,
+                    "Land Borders": landMarkers
+                }
+            }
+
+            //L.control.layers(groupedOverlays).addTo(map);
+            L.control.groupedLayers("", groupedOverlays).addTo(map);
+
+
+        }
+
+        map.on('zoomend', function () {
+            console.log(2)
+            var markers = getAllMarkers();
+
+            markers.forEach(marker => {
+                let img = marker._icon;
+
+                anIcon = new L.Icon({
+                    iconUrl: img.src,
+                    iconSize: [(map.getZoom()) * 2, (map.getZoom()) * 2],
+                    iconAnchor: [22, 15]
+                });
+                marker.setIcon(anIcon);
+            })
+        });
+
+
+        function getAllMarkers() {
+            var allMarkersObjArray = [];//new Array();
+
+            //map._layers.forEach(layer => {
+
+            //    if (layer instanceof L.Marker) {
+            //        allMarkersObjArray.push(layer)
+            //    }
+            //})
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    allMarkersObjArray.push(layer)
+                }
+            });
+            return allMarkersObjArray;
+        }
+
+        getPoE();
+    </script>
+</body>
+</html>
